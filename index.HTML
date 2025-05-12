@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>கோப்பை/லபாக்கை பில் மெஷின்</title>
+    <style>
+        body{
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 50px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .receipt {
+            margin-top: 30px;
+            border-top: 2px dashed #333;
+            padding-top: 20px;
+            display: none;
+        }
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .receipt-details {
+            margin-bottom: 20px;
+        }
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .receipt-table th, .receipt-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .receipt-table th {
+            background-color: #f2f2f2;
+        }
+        .total-amount {
+            font-weight: bold;
+            font-size: 18px;
+            text-align: right;
+        }
+        .print-btn {
+            background-color: #3498db;
+            display: block;
+            margin: 20px auto;
+        }
+        .print-btn:hover {
+            background-color: #2980b9;
+        }
+        @media print {
+            button, .no-print {
+                display: none;
+            }
+            .receipt {
+                display: block !important;
+                border: none;
+            }
+            body {
+                padding: 0;
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TST COCONUT BUSINESS</h1>
+        
+        <div class="form-group">
+            <label for="name">பெயர்:</label>
+            <input type="text" id="name" placeholder="வாடிக்கையாளர் பெயரை உள்ளிடவும்">
+        </div>
+        
+        <div class="form-group">
+            <label for="place">ஊர்:</label>
+            <input type="text" id="place" placeholder="ஊரை உள்ளிடவும்">
+        </div>
+        
+        <div class="form-group">
+            <label for="date">தேதி:</label>
+            <input type="date" id="date">
+        </div>
+        
+        <div class="form-group">
+            <label for="toNumber">வாடிக்கையாளர் மொபைல் (To):</label>
+            <input type="text" id="toNumber" placeholder="கஸ்டமர் மொபைல் எண்">
+        </div>
+        
+        <div class="form-group">
+            <label for="coconut">மொத்த தேங்காய் எண்ணிக்கை:</label>
+            <input type="number" id="coconut" min="0" placeholder="மொத்த தேங்காய் எண்ணிக்கை" value="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="subtraction">லாபக்காய் :</label>
+            <input type="number" id="subtraction" min="0" placeholder="கழிக்க வேண்டிய தேங்காய்" value="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="netCoconut">நிகர தேங்காய் எண்ணிக்கை:</label>
+            <input type="number" id="netCoconut" min="0" placeholder="நிகர தேங்காய்" readonly>
+        </div>
+        
+        <div class="form-group">
+            <label for="coconutRate">தேங்காய் விலை (ஒன்றுக்கு):</label>
+            <input type="number" id="coconutRate" min="0" value="0">
+        </div>
+        
+        <button onclick="generateReceipt()">பில் உருவாக்கு</button>
+        <button class="print-btn" onclick="printReceipt()" style="display:none;">பிரிண்ட் செய்க</button>
+        
+        <div id="receipt" class="receipt">
+            <div class="receipt-header">
+                <h2>TST COCONUT BUSINESS</h2>
+                <p id="receiptDate"></p>
+            </div>
+            
+            <div class="receipt-details">
+                <p><strong>பெயர்:</strong> <span id="receiptName"></span></p>
+                <p><strong>ஊர்:</strong> <span id="receiptPlace"></span></p>
+                <p><strong>From:</strong> 8220756456</p>
+                <p><strong>To:</strong> <span id="receiptToNumber"></span></p>
+            </div>
+            
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th>பொருள்</th>
+                        <th>அளவு</th>
+                        <th>விலை</th>
+                        <th>மொத்தம்</th>
+                    </tr>
+                </thead>
+                <tbody id="receiptItems">
+                </tbody>
+            </table>
+            
+            <div class="total-amount">
+                <p>மொத்த தொகை: ₹<span id="receiptTotal"></span></p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <p><span>நன்றி! மீண்டும் வருக!</span></p>
+                <p><span>தொடர்புக்கு: 8220756456</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Calculate net coconut automatically
+        document.getElementById('coconut').addEventListener('input', calculateNetCoconut);
+        document.getElementById('subtraction').addEventListener('input', calculateNetCoconut);
+        
+        function calculateNetCoconut() {
+            const coconut = parseFloat(document.getElementById('coconut').value) || 0;
+            const subtraction = parseFloat(document.getElementById('subtraction').value) || 0;
+            const netCoconut = coconut - subtraction;
+            document.getElementById('netCoconut').value = netCoconut > 0 ? netCoconut : 0;
+        }
+        
+        function generateReceipt() {
+            // Get input values
+            const name = document.getElementById('name').value;
+            const place = document.getElementById('place').value;
+            const date = document.getElementById('date').value;
+            const toNumber = document.getElementById('toNumber').value;
+            const coconut = parseFloat(document.getElementById('coconut').value) || 0;
+            const subtraction = parseFloat(document.getElementById('subtraction').value) || 0;
+            const netCoconut = parseFloat(document.getElementById('netCoconut').value) || 0;
+            const coconutRate = parseFloat(document.getElementById('coconutRate').value);
+            
+            // Calculate totals
+            const coconutTotal = netCoconut * coconutRate;
+            const grandTotal = coconutTotal;
+            
+            // Format date
+            const formattedDate = date ? new Date(date).toLocaleDateString('ta-IN') : new Date().toLocaleDateString('ta-IN');
+            
+            // Display in receipt
+            document.getElementById('receiptName').textContent = name;
+            document.getElementById('receiptPlace').textContent = place;
+            document.getElementById('receiptToNumber').textContent = toNumber;
+            document.getElementById('receiptDate').textContent = formattedDate;
+            
+            // Build receipt items
+            const receiptItems = document.getElementById('receiptItems');
+            receiptItems.innerHTML = '';
+            
+            if (coconut > 0) {
+                addReceiptRow(receiptItems, "மொத்த தேங்காய்", coconut + "", "--", "--" );
+            }
+            
+            if (subtraction > 0) {
+                addReceiptRow(receiptItems, "லாபக்காய்", subtraction + "", "--", "--" );
+            }
+            
+            if (netCoconut > 0) {
+                addReceiptRow(receiptItems, "நிகர தேங்காய்", netCoconut + "", "₹" + coconutRate.toFixed(2), "₹" + coconutTotal.toFixed(2));
+            }
+            
+            document.getElementById('receiptTotal').textContent = grandTotal.toFixed(2);
+            
+            // Show receipt and print button
+            document.getElementById('receipt').style.display = 'block';
+            document.querySelector('.print-btn').style.display = 'block';
+            
+            // Auto print after 1 second
+            setTimeout(printReceipt, 1000);
+        }
+        
+        function addReceiptRow(table, item, qty, rate, total) {
+            const row = table.insertRow();
+            row.insertCell().textContent = item;
+            row.insertCell().textContent = qty;
+            row.insertCell().textContent = rate;
+            row.insertCell().textContent = total;
+        }
+        
+        function printReceipt() {
+            window.print();
+        }
+        
+        // Set default date to today
+        document.getElementById('date').valueAsDate = new Date();
+    </script>
+</div>
+<script src="karthi.js"></script>
+    
+</body>
+</html>
